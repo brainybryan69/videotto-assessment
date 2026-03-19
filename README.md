@@ -60,10 +60,7 @@ Write regression tests for the bugs you find. Your tests should fail on the orig
 
 This repo was provided as a GitHub template. Push your changes to the repo you created from it, then share the link with us. Include a brief writeup (in a NOTES.md, in this README, or in your commit messages) covering:
 
-- What you found (root cause of each bug)
-- What you fixed and why
-- Any design decisions in your debouncer implementation
-- Anything else you noticed or would improve given more time
+See [NOTES.md](NOTES.md) for a full writeup of findings, fixes, design decisions, and observations.
 
 ## Time
 

@@ -37,4 +37,47 @@ def debounce_speaker_ids(speaker_track_ids, min_hold_frames=15):
         >>> debounce_speaker_ids([None]*10 + [0]*50, min_hold_frames=15)
         [None]*10 + [0]*50  # None segments are untouched
     """
-    raise NotImplementedError("TODO: Implement this function — see docstring for spec")
+    if not speaker_track_ids:
+        return []
+
+    # Step 1: RLE encode into [track_id, start, length] runs
+    runs = []
+    i = 0
+    while i < len(speaker_track_ids):
+        current = speaker_track_ids[i]
+        j = i
+        while j < len(speaker_track_ids) and speaker_track_ids[j] == current:
+            j += 1
+        runs.append([current, i, j - i])
+        i = j
+
+    # Step 2: Replace short non-None runs with nearest stable neighbour
+    for idx in range(len(runs)):
+        track_id, _start, length = runs[idx]
+
+        if track_id is None or length >= min_hold_frames:
+            continue
+
+        # Prefer previous stable non-None run
+        replacement = None
+        for prev in range(idx - 1, -1, -1):
+            if runs[prev][0] is not None and runs[prev][2] >= min_hold_frames:
+                replacement = runs[prev][0]
+                break
+
+        # Fall back to next stable non-None run
+        if replacement is None:
+            for nxt in range(idx + 1, len(runs)):
+                if runs[nxt][0] is not None and runs[nxt][2] >= min_hold_frames:
+                    replacement = runs[nxt][0]
+                    break
+
+        if replacement is not None:
+            runs[idx][0] = replacement
+
+    # Step 3: Expand back to per-frame list
+    result = []
+    for track_id, _start, length in runs:
+        result.extend([track_id] * length)
+
+    return result
